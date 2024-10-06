@@ -145,7 +145,7 @@ pub fn add_msg(pkg_name:&str, msg_file:String)->Result<(), Error>
     let name_index = msg_file.find(".").unwrap();
     let struct_name = msg_file.get(0..name_index).unwrap();
 
-    let name_str = format!("#[derive(Serialize, Deserialize)]\npub struct {}{{\n", struct_name);
+    let name_str = format!("#[derive(Serialize, Deserialize, Clone)]\npub struct {}{{\n", struct_name);
 
     content.push(name_str);
 
@@ -191,8 +191,7 @@ pub fn add_msg(pkg_name:&str, msg_file:String)->Result<(), Error>
 
     result = format!("{}}}", result);
 
-    result = format!("{}\npub fn serialize_{}(value:&{})->String\n{{\n    serde_json::to_string(value).unwrap()\n{}", result, struct_name.to_lowercase(), struct_name, "}");
-    result = format!("{}\npub fn deserialize_{}(str_value:String)->{}\n{{\n     let result:{} = serde_json::from_str(&str_value).unwrap();\n    result\n}}", result, struct_name.to_lowercase(), struct_name, struct_name);
+    result = format!("{}\n\nimpl FLSMsg for {} {{}}", result, struct_name);
 
     match fs::write(pkg_path, result)
     {
